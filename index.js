@@ -15,24 +15,30 @@ const debounce = (fn, debounceTime) => {
 };
 let searchFn = debounce(fetchRepos, 600)
 
+let searchTimeout
 input.addEventListener('keyup', (evt) => {
-    let userData = evt.target.value;
 
-    if (userData.trim()) {
-        searchFn(userData)
-    } else {
-        autocomplete.innerHTML = ''
-    }
+    clearTimeout(searchTimeout)
+    searchTimeout = setTimeout(() => {
+        const userData = evt.target.value;
+
+        if (userData.trim()) {
+            searchFn(userData)
+        } else {
+            autocomplete.innerHTML = ''
+        }
+    }, 400)
+    
 })
 
 async function fetchRepos(searchText) {
     autocomplete.innerHTML = ''
     return await fetch(`https://api.github.com/search/repositories?q=${searchText}`).then(result => {
         if (result.ok) {
-            result.json().then( data => data.items.slice(0, 5).forEach(createAutocompleteItem))
+            result.json().then(data => data.items.slice(0, 5).forEach(createAutocompleteItem))
         } else {
             console.error('Ошибка запроса:', result.status);
-        }        
+        }
     })
 }
 
